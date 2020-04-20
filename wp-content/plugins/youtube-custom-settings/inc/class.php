@@ -110,28 +110,65 @@ if (!class_exists('youtube_custom_settingsClass')) {
         function shapeSpace_oembed_html($html, $url, $attr, $post_id) {
 
             $id = explode("/", $url);
+            $videos_all_url = $id[2];
+
+            // echo '<pre>';
+            // print_r($id);
+            // echo '</pre>';
+            
+            if($videos_all_url == 'youtu.be'){
+
             $end_id = end($id);
-
-            $width = $attr['width'];
-            $height = $attr['height'];
-
             
             $html = '<iframe src="//www.youtube.com/embed/'.$end_id.'?enablejsapi=1&amp;rel=0&amp;showinfo=0&amp;" frameborder="0" ></iframe><div class="start-video"></div>';
             
             return '<div class="oembed">        
-                        <div class="video_overly_ch1"></div>
-                        <div class="video_overly_ch2"></div>
-                        <div class="video_overly_ch3"></div>
-                        <div class="video_overly_ch4"></div>
-                        <div class="video_overly_ch_m1"></div>
-                        <div class="video_overly_ch5"></div>
-                        <div class="video_overly_ch6"></div>
-                        <div class="video_overly_ch7"></div>
+                        <div class="video_overly_ch1 video_play_op"></div>
+                        <div class="video_overly_ch2 video_play_op"></div>
+                        <div class="video_overly_ch3 video_play_op"></div>
+                        <div class="video_overly_ch4 video_play_op"></div>
+                        <div class="video_overly_ch_m1 video_play_op"></div>
+                        <div class="video_overly_ch5 video_play_op"></div>
+                        <div class="video_overly_ch6 video_play_op"></div>
+                        <div class="video_overly_ch7 video_play_op"></div>
                         <div class="video_overly_ch_m2"></div>
                         <div class="video_overly_sch1"></div>
                         
                         '. $html .'
                     </div>';
+
+            }elseif($videos_all_url == 'www.dailymotion.com'){
+
+                $end_id = end($id);
+
+                $html = '<iframe frameborder="0"
+                src="//www.dailymotion.com/embed/video/'.$end_id.'?mute=0&info=0&logo=0&social=0&queue-enable=false" allow="autoplay"></iframe>';
+
+                return '<div class="oembed">        
+                            <div class="dailymotion_video_s"></div>
+                            '. $html .'
+                        </div>';
+
+                //return ' <iframe frameborder="0" allowfullscreen="true" width="640" height="360" src="http://www.dailymotion.com/embed/video/x3om8ig?mute=0&info=0&logo=0&related=0&social=0&highlight=FFCC33"></iframe>';
+
+            }elseif($videos_all_url == 'www.facebook.com'){
+
+                $id = array_values(array_filter($id));
+                // echo '<pre>';
+                // print_r($id);
+                // echo '</pre>';
+
+                $end_id = end($id);
+
+                $html = '<iframe src="http://www.facebook.com/video/embed?video_id='.$end_id.'" frameborder="0"></iframe>';
+
+                    //$html = '<iframe frameborder="0" allowtransparency="true" allowfullscreen="false" scrolling="no" allow="encrypted-media"
+                     //src="http://www.facebook.com/video/embed?video_id='.$end_id.'" style="border: none; visibility: visible;" ></iframe>';
+                     
+                return $html;
+            }else{
+                return $html;
+            }
                 
         }
 

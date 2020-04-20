@@ -170,53 +170,32 @@ jQuery(document).ready(function($){
   var players = new Array(playerDivsArr.length); // gets the yt-player objects
   var waypoints = new Array(playerDivsArr.length);
 
-
  // console.log(waypoints);
 
-  // const iframes = document.querySelectorAll('iframe');
-  // for(var i=0; i<iframes.length; i++){
+  // when youtube stuff is ready
+  onYouTubeIframeAPIReady = function () {
+    
+    // create yt players
+    playerDivsArr.forEach(function(e, i) { // forEach ...
+      
+      players[i] = new YT.Player(e.id, {
 
-  // var ifr = iframes[i].id;
-  //console.log(iframe1);
-    // var player;
+        events: {
+          'onReady': onPlayerReady,
+          'onStateChange': onPlayerStateChange
+          }
 
-    // onYouTubeIframeAPIReady = function () {
-    //     player = new YT.Player(ifr, {
-    //         events: {
-    //             'onStateChange': onPlayerStateChange
-    //         }
-    //     });
-    // }
-      // when youtube stuff is ready
-      onYouTubeIframeAPIReady = function () {
-        
-        // create yt players
-        playerDivsArr.forEach(function(e, i) { // forEach ...
-          
-          players[i] = new YT.Player(e.id, {
+      });
 
-            events: {
-              'onReady': onPlayerReady,
-              'onStateChange': onPlayerStateChange
-             }
+    });
+    
+  }
 
-          });
-
-        });
-        
-        
-      }
-
-
-  // }
   onPlayerStateChange = function (event) {
     // console.log(event.target.f);
     players.forEach(function(yt, i) {
 
       var thisiframe = event.target.f.id;
-      
-
-      //var thisiframe = jQuery(this).prev('iframe').attr('id');
       
       if (event.data == YT.PlayerState.ENDED) {
           jQuery('#'+thisiframe).next('.start-video').fadeIn('normal');
@@ -225,16 +204,16 @@ jQuery(document).ready(function($){
       else if (event.data == YT.PlayerState.PLAYING) {
         
         jQuery('#'+thisiframe).next(".start-video").attr("style", "display: none;");
-        console.log(thisiframe);
+        //jQuery('#'+thisiframe).closest('div.oembed').find(".video_play_op").attr("style", "cursor: unset;");
+        //console.log(thisiframe);
         playing = true;
       }
 
       else if(event.data == YT.PlayerState.PAUSED){
-        console.log(event.target.f.id);
+        //console.log(event.target.f.id);
 
-        jQuery('#'+thisiframe).next(".start-video").attr("style", "display: block;");
-        jQuery('#'+thisiframe).closest('div.oembed').find(".video_overly_ch_m1").attr("style", "z-index: 9; background-color: transparent;"); 
-        //jQuery(".video_overly_ch_m1").attr("style", "z-index: 9; background-color: transparent;");
+        jQuery('#'+thisiframe).next(".start-video").attr("style", "display: block;"); 
+        jQuery('#'+thisiframe).closest('div.oembed').find(".video_overly_ch_m1").attr("style", "z-index: 9; background-color: transparent;");
       }
 
     });
@@ -242,8 +221,8 @@ jQuery(document).ready(function($){
   }
   function onPlayerReady(event) {
     
-    
     players.forEach(function(yt, i) {
+
       jQuery(document).on('click', '.start-video', function (e) {
         //console.log(players[i].f.id);
         var thisfid = jQuery(this).prev('iframe').attr('id');
@@ -255,18 +234,24 @@ jQuery(document).ready(function($){
         if(thisfid == players[i].f.id){
           players[i].playVideo();
         }
-
-
       });
+
+      jQuery(document).on('click', '.video_play_op', function (e) {
+  
+        var thisfid = jQuery(this).closest('div.oembed').find('iframe').attr('id');
+        //console.log(thisfid);
+
+        if(thisfid == players[i].f.id){
+          players[i].pauseVideo();
+        }
+      });
+
     });
+
   }
 
 
   
-
-
-
-
 
   var all_url = youtubeAjax['all_url'];
   //console.log(all_url);
@@ -278,7 +263,6 @@ jQuery(document).ready(function($){
     var all_url_var = all_url_arr[1];
 
     //console.log(all_url_var);
-
 
     jQuery('a').each(function(v, k){
 
