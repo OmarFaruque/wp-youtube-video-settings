@@ -37,6 +37,10 @@ if (!class_exists('youtube_custom_settingsClass')) {
             add_action('wp_ajax_nopriv_custom_buttonfunction', array($this, 'custom_buttonfunction'));
             add_action( 'wp_ajax_custom_buttonfunction', array($this, 'custom_buttonfunction') );
 
+            //custom button function function 
+            add_action('wp_ajax_nopriv_enable_full_screenfunction', array($this, 'enable_full_screenfunction'));
+            add_action( 'wp_ajax_enable_full_screenfunction', array($this, 'enable_full_screenfunction') );
+
             /*Settins hook to wp admin via js */
             add_action( 'wp_head', array($this, 'youtubeJStoFrontHead') );
             
@@ -91,23 +95,25 @@ if (!class_exists('youtube_custom_settingsClass')) {
             add_menu_page( 'Youtube Custom Settings', 'Youtube Custom Settings', 'manage_options', 'youtube_custom_settings-menu', array($this, 'submenufunction'), 'dashicons-list-view', 50 );
         }
 
-        function filter_the_content_in_the_main_loop( $content ) {
-            $DOM = new DOMDocument();
-            $DOM->loadHTML($content);
-            $list = $DOM->getElementsByTagName('iframe');
-            $i = 0;
+        // function filter_the_content_in_the_main_loop( $content ) {
+        //     $DOM = new DOMDocument();
+        //     $DOM->loadHTML($content);
+        //     $list = $DOM->getElementsByTagName('iframe');
+        //     $i = 0;
 
-            foreach($list as $p){
-                $p->setAttribute('class', 'iframe'.$i++);
-            }
-            $DOM=$DOM->saveHTML(); 
-            $content = $DOM;
+        //     foreach($list as $p){
+        //         $p->setAttribute('class', 'iframe'.$i++);
+        //     }
+        //     $DOM=$DOM->saveHTML(); 
+        //     $content = $DOM;
 
-            return $content;
-        }
+        //     return $content;
+        // }
 
         // Customize oEmbed markup
         function shapeSpace_oembed_html($html, $url, $attr, $post_id) {
+
+            $enable_full_screen = (get_option( 'enable_full_screen' ) == 1) ? 'allowfullscreen' : '';
 
             $id = explode("/", $url);
             $videos_all_url = $id[2];
@@ -120,7 +126,7 @@ if (!class_exists('youtube_custom_settingsClass')) {
 
             $end_id = end($id);
             
-            $html = '<iframe src="//www.youtube.com/embed/'.$end_id.'?enablejsapi=1&amp;rel=0&amp;showinfo=0&amp;" frameborder="0" ></iframe><div class="start-video"></div>';
+            $html = '<iframe src="//www.youtube.com/embed/'.$end_id.'?enablejsapi=1&amp;rel=0&amp;showinfo=0&amp;" frameborder="0" '.$enable_full_screen.'></iframe><div class="start-video"></div>';
             
             return '<div class="oembed">        
                         <div class="video_overly_ch1 video_play_op"></div>
@@ -142,7 +148,7 @@ if (!class_exists('youtube_custom_settingsClass')) {
                 $end_id = end($id);
 
                 $html = '<iframe frameborder="0"
-                src="//www.dailymotion.com/embed/video/'.$end_id.'?mute=0&info=0&logo=0&social=0&queue-enable=false" allow="autoplay"></iframe>';
+                src="//www.dailymotion.com/embed/video/'.$end_id.'?mute=0&info=0&logo=0&social=0&queue-enable=false" allow="autoplay" '.$enable_full_screen.'></iframe>';
 
                 return '<div class="oembed">        
                             <div class="dailymotion_video_s"></div>
@@ -160,7 +166,7 @@ if (!class_exists('youtube_custom_settingsClass')) {
 
                 $end_id = end($id);
 
-                $html = '<iframe src="http://www.facebook.com/video/embed?video_id='.$end_id.'" frameborder="0"></iframe>';
+                $html = '<iframe src="http://www.facebook.com/video/embed?video_id='.$end_id.'" frameborder="0" '.$enable_full_screen.'></iframe>';
 
                     //$html = '<iframe frameborder="0" allowtransparency="true" allowfullscreen="false" scrolling="no" allow="encrypted-media"
                      //src="http://www.facebook.com/video/embed?video_id='.$end_id.'" style="border: none; visibility: visible;" ></iframe>';
@@ -180,7 +186,6 @@ if (!class_exists('youtube_custom_settingsClass')) {
             // echo 'jony'. get_option( 'custom_button' ) . '</br>';
             // echo 'image :' . get_option( 'button_image' ) . '</br>';
             // echo 'all url :' . get_option( 'add_all_url' ) . '</br>';
-
 
             if (isset($_POST['button_image'])){
                 $icon = $_POST['button_image'];
@@ -220,8 +225,7 @@ if (!class_exists('youtube_custom_settingsClass')) {
                 update_option( 'add_all_url', $add_all_url);
             }
 
-            
-                
+        
             ob_start();
             ?>
                 <div class="youtube_custom_settings-submenu">
@@ -262,6 +266,21 @@ if (!class_exists('youtube_custom_settingsClass')) {
                                                 <input id="upload-button" type="button" class="button" value="Upload Image" />
                                                 <input type="submit" class="image_up_b" value="Submit" />
                                             </form>
+                                        </td>
+                                    </tr>
+                                    <tr> 
+                                        <th><?php _e('Enable video full screen', 'youtube_custom_settings'); ?></th>
+                                        <td><div class='checkbox' id='hideSearch'>
+                                                <label class='checkbox__container'>
+                                                <input class='checkbox__toggle' type='checkbox' value="1" name='enable_full_screen' <?php echo $checked = (get_option( 'enable_full_screen' ) == 1) ? 'checked' : '' ; ?>/>
+                                                <span class='checkbox__checker'></span>
+                                                <span class='checkbox__txt-left'>On</span>
+                                                <span class='checkbox__txt-right'>Off</span>
+                                                <svg class='checkbox__bg' space='preserve' style='enable-background:new 0 0 110 43.76;' version='1.1' viewbox='0 0 110 43.76'>
+                                                    <path class='shape' d='M88.256,43.76c12.188,0,21.88-9.796,21.88-21.88S100.247,0,88.256,0c-15.745,0-20.67,12.281-33.257,12.281,S38.16,0,21.731,0C9.622,0-0.149,9.796-0.149,21.88s9.672,21.88,21.88,21.88c17.519,0,20.67-13.384,33.263-13.384,S72.784,43.76,88.256,43.76z'></path>
+                                                </svg>
+                                                </label>
+                                            </div>
                                         </td>
                                     </tr>
                                     <tr class="block_url_tr"> 
@@ -337,6 +356,20 @@ if (!class_exists('youtube_custom_settingsClass')) {
             )
         );
         die();
+        }
+        function enable_full_screenfunction(){
+
+            $value = $_POST['value'];
+    
+            update_option( 'enable_full_screen', $value);
+    
+            echo json_encode(
+                array(
+                    'message' => 'success',
+                    'value' => $value
+                )
+            );
+            die();
         }
 
         /*

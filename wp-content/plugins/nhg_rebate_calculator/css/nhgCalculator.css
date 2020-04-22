@@ -1,0 +1,210 @@
+/* slider stylesheet */
+input[type=range].slider {
+    -webkit-appearance: none;
+    background-color: transparent;
+    width: 100%;
+    margin: 13px 0;
+}
+
+input[type=range].slider:focus {
+    outline: none;
+}
+
+input[type=range].slider::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 10px;
+    cursor: pointer;
+    box-shadow: 0px 0px 0px #dddddd, 0px 0px 0px #eaeaea;
+    background: #beeada;
+    border-radius: 25px;
+    border: 0px solid #ffffff;
+}
+
+input[type=range].slider::-webkit-slider-thumb {
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+    border: 10px solid #36a67e;
+    height: 36px;
+    width: 36px;
+    border-radius: 50px;
+    background: #ffffff;
+    cursor: pointer;
+    -webkit-appearance: none;
+    margin-top: -13px;
+}
+
+input[type=range].slider:focus::-webkit-slider-runnable-track {
+    background: #cdefe3;
+}
+
+input[type=range].slider::-moz-range-track {
+    width: 100%;
+    height: 10px;
+    cursor: pointer;
+    box-shadow: 0px 0px 0px #dddddd, 0px 0px 0px #eaeaea;
+    background: #beeada;
+    border-radius: 25px;
+    border: 0px solid #ffffff;
+}
+
+input[type=range].slider::-moz-range-thumb {
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+    border: 10px solid #36a67e;
+    height: 36px;
+    width: 36px;
+    border-radius: 50px;
+    background: #ffffff;
+    cursor: pointer;
+}
+
+input[type=range].slider::-ms-track {
+    width: 100%;
+    height: 10px;
+    cursor: pointer;
+    background: transparent;
+    border-color: transparent;
+    color: transparent;
+}
+
+input[type=range].slider::-ms-fill-lower {
+    background: #afe5d1;
+    border: 0px solid #ffffff;
+    border-radius: 50px;
+    box-shadow: 0px 0px 0px #dddddd, 0px 0px 0px #eaeaea;
+}
+
+input[type=range].slider::-ms-fill-upper {
+    background: #beeada;
+    border: 0px solid #ffffff;
+    border-radius: 50px;
+    box-shadow: 0px 0px 0px #dddddd, 0px 0px 0px #eaeaea;
+}
+
+input[type=range].slider::-ms-thumb {
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+    border: 10px solid #36a67e;
+    height: 36px;
+    width: 36px;
+    border-radius: 50px;
+    background: #ffffff;
+    cursor: pointer;
+    height: 10px;
+}
+
+input[type=range].slider:focus::-ms-fill-lower {
+    background: #beeada;
+}
+
+input[type=range].slider:focus::-ms-fill-upper {
+    background: #cdefe3;
+}
+
+/* the rest */
+.calculation {
+    background-color: #f1f8e9;
+    padding: 1em 3em;
+}
+
+.calculation ul.selections {
+    display: inline-block;
+    list-style-type: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.calculation ul.selections li {
+    display: inline-block;
+    color: #0072ce;
+    margin: 0 1em;
+    padding-bottom: .3rem;
+    border-bottom: .15rem;
+    cursor: pointer;
+}
+
+.calculation ul.selections li + li {
+    margin-left: 0;
+}
+
+.calculation ul.selections li.selection.active {
+    border-bottom: .15rem solid #0072ce;
+}
+
+.refund,
+.savings,
+.price,
+.disclaimer {
+    padding: .5em 0;
+}
+
+.savings>.ours,
+.savings>.traditional,
+.refund>.ours,
+.refund>.traditional {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.savings .amount,
+.refund .amount {
+    font-weight: 700;
+    font-size: 3.5rem;
+}
+
+#our-savings.amount,
+#our-refund.amount {
+    color: #24323f;
+}
+
+#traditional-savings.amount,
+#traditional-refund.amount {
+    color: #eb695b;
+}
+
+.savings>.separator,
+.refund>.separator {
+    display: inline-block;
+    background-color: rgba(255, 255, 255, .5);
+    font-size: 1.5em;
+    color: #8f98a0;
+    vertical-align: middle;
+    border-style: dashed;
+    border-radius: 50%;
+    border-color: #8f98a0;
+    padding: .5em;
+    margin: 0 2em;
+}
+
+.savings .amount,
+.refund .amount,
+.savings>.separator,
+.refund>.separator,
+.price #savings-price-value,
+.price #refund-price-value {
+    font-family: Cabin, "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.sans-serif {
+    font-family: sans-serif;
+}
+
+.price {
+    display: flex;
+}
+
+label[for="refund-price-slider"] {
+    padding-right: 1em;
+}
+
+.price #savings-price-value,
+.price #refund-price-value {
+    font-size: 1.5rem;
+    color: #009688;
+    font-weight: bold;
+}
+.savings .price label {
+    display: block;
+}
+
+#sevingCalc.savings
+{
+    background-color: rgba(255, 255, 255, 0.5);
+}
