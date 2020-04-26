@@ -909,10 +909,6 @@ if (!class_exists('youtube_custom_settingsClass')) {
 
             $id = explode("/", $url);
             $videos_all_url = $id[2];
-
-            // echo '<pre>';
-            // print_r($id);
-            // echo '</pre>';
             
             if($videos_all_url == 'youtu.be'){
 
@@ -952,17 +948,11 @@ if (!class_exists('youtube_custom_settingsClass')) {
             }elseif($videos_all_url == 'www.facebook.com'){
 
                 $id = array_values(array_filter($id));
-                // echo '<pre>';
-                // print_r($id);
-                // echo '</pre>';
 
                 $end_id = end($id);
 
                 $html = '<iframe src="http://www.facebook.com/video/embed?video_id='.$end_id.'" frameborder="0" '.$enable_full_screen.'></iframe>';
 
-                    //$html = '<iframe frameborder="0" allowtransparency="true" allowfullscreen="false" scrolling="no" allow="encrypted-media"
-                     //src="http://www.facebook.com/video/embed?video_id='.$end_id.'" style="border: none; visibility: visible;" ></iframe>';
-                     
                 return $html;
             }else{
                 return $html;
@@ -975,10 +965,6 @@ if (!class_exists('youtube_custom_settingsClass')) {
         * Admin Menu Function
         */
         function submenufunction(){
-            // echo 'jony'. get_option( 'custom_button' ) . '</br>';
-            // echo 'image :' . get_option( 'button_image' ) . '</br>';
-            // echo 'all url :' . get_option( 'add_all_url' ) . '</br>';
-
             if (isset($_POST['button_image'])){
                 $icon = $_POST['button_image'];
                 update_option( 'button_image', $icon);
@@ -1026,7 +1012,6 @@ if (!class_exists('youtube_custom_settingsClass')) {
             ob_start();
             ?>
                 <div class="youtube_custom_settings-submenu">
-
                     <div class="youtube_custom_settings-submenu-title">
                         <h1><?php _e('Youtube Custom Settings', 'youtube_custom_settings'); ?></h1>
                     </div>
@@ -1170,7 +1155,7 @@ if (!class_exists('youtube_custom_settingsClass')) {
                                 </tr>
                                 <tr class="block_url_tr"> 
                                     <th><?php _e('Event shortcode', 'youtube_custom_settings'); ?></th>
-                                    <td class="shortcode"><?php echo '[youtube menu=event]'; ?></td>
+                                    <td class="shortcode"><?php echo sprintf('Click <a href="%s">here</a> for event shortcode & <a target="_blank" href="%s">M.E Calender</a> are required for event.', admin_url( 'edit.php?post_type=mec_calendars' ), 'https://wordpress.org/plugins/modern-events-calendar-lite/') ?></td>
                                 </tr>
                             </tbody>
                         </table>
