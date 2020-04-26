@@ -108,7 +108,7 @@
 			$country = file_get_contents('http://ip-api.com/json/'.$ip);
 			$country = json_decode($country, true);
 			$city = $country['city'];
-			echo 'jony :' . $city;
+			echo 'Omar F :' . $city;
 
 			
 			extract( $args );
@@ -238,7 +238,7 @@
 			$country = file_get_contents('http://ip-api.com/json/'.$ip);
 			$country = json_decode($country, true);
 			$city = $country['city'];
-			echo 'jony :' . $city;
+			echo 'jony 4 :' . $city;
 			
 			$city_name        = ! empty( $instance[ 'city_name' ] ) ? $instance[ 'city_name' ] : $city;
 			$city_selector    = isset( $instance[ 'city_selector' ] ) ? $instance[ 'city_selector' ] : 2372139;
@@ -804,7 +804,7 @@
 		$country = file_get_contents('http://ip-api.com/json/'.$ip);
 		$country = json_decode($country, true);
 		$city = $country['city'];
-		echo 'jony :' . $city;
+		echo 'jony 8:' . $city;
 
 
 		

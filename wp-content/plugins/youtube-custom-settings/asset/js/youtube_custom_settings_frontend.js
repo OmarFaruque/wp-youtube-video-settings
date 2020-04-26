@@ -285,3 +285,36 @@ jQuery(document).ready(function($){
 !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
 
 
+
+
+
+
+
+
+/*
+* Omar Code
+*/
+jQuery(document).ready(function($){
+  var getWatherAtlasID = function(){
+    var weather_atlas_language = 'en',
+    request = 'khulna';
+    $.ajax( {
+      url: 'https://www.weather-atlas.com/weather/includes/autocomplete_city.php?callback=?',
+      dataType: 'jsonp',
+      data: {
+        limit: 15, language: weather_atlas_language, term: request
+      },
+      success: function ( data )
+      { //fsfsdf
+      console.log(data);
+      }
+    } );
+  }
+
+  getWatherAtlasID();
+
+
+
+
+
+});
