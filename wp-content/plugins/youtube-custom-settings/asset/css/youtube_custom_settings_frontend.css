@@ -194,3 +194,47 @@ iframe#iframe1 {
     height: 100%;
     background-color: black;
 } */
+
+
+article.single-news-post h2 {
+    color: #202124;
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 25px;
+}
+article.single-news-post a {
+    text-decoration: none;
+}
+.post-info {
+    display: flex;
+    padding-top: 20px;
+    border-bottom: 2px solid #383838;
+    margin-bottom: 25px;
+}
+.author-info {
+    width: 60%;
+}
+.author-info h3 {
+    color: #484040;
+    font-size: 18px;
+    display: inline-block;
+    margin-top: 15px !important;
+}
+.post-date.text-right{
+    width: 40%;
+    letter-spacing: 3px;
+    padding: 15px 0;
+    font-size: 14px;
+}
+.readmore a {
+    color: #1a73e8;
+}
+.readmore p {
+    color: #323437;
+}
+.post-date.text-right a {
+    color: #323437;
+}
+.text-right {
+    text-align: right;
+}

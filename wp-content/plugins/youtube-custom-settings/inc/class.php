@@ -46,7 +46,17 @@ if (!class_exists('youtube_custom_settingsClass')) {
             
             //add filter
             //add_filter( 'the_content', array($this, 'filter_the_content_in_the_main_loop') );
+
+            // Shortcode for frontend use
+            add_shortcode( 'newsfeed', array($this, 'youtube_custom_shortcode') );
+
+            add_action( 'init', array($this, 'weather_atlas') );
             
+        }
+
+        function weather_atlas()
+        {
+            require_once $this->plugin_url . 'inc/weather-atlas/weather-atlas.php';
         }
 
 
@@ -109,6 +119,152 @@ if (!class_exists('youtube_custom_settingsClass')) {
 
         //     return $content;
         // }
+
+
+        //get client ip
+        protected function get_ip(){
+
+            $ip = '';
+
+            if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+                $ip = $_SERVER['HTTP_CLIENT_IP'];
+            } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+                $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+            } else {
+                $ip = $_SERVER['REMOTE_ADDR'];        
+            }
+
+            return $ip;
+        }
+
+        // Shortcode for breaking-news
+        function youtube_custom_shortcode($atts){
+
+            echo '<pre>';
+            print_r($atts);
+            echo '</pre>';
+
+            $ip = $this->get_ip();
+            $country = file_get_contents('http://ip-api.com/json/'.$ip);
+            $country = json_decode($country, true);
+            echo 'return country: <br/><pre>';
+            print_r($country);
+            echo '</pre>';
+
+            if($atts['menu'] == 'local-news'){
+
+                $google_news_api = get_option( 'google_news_api' );
+                //$countryCode = $country['countryCode'];
+                $countryCode = 'US';
+
+                $url = file_get_contents('http://newsapi.org/v2/top-headlines?country='.$countryCode.'&apiKey='. $google_news_api);
+                $url = json_decode($url, true);
+                $url = $url['articles'];
+                ?>
+                <div class="google-breaking-news">
+                <?php
+                    for ($i = 0; $i < count($url); $i++) {
+                    ?>
+                        
+                        <article class="single-news-post">
+                            <a href="<?php echo $url[$i]['url']; ?>">
+                                <h2><?php echo $url[$i]['title']; ?></h2>
+                            </a>
+                            <a href="<?php echo $url[$i]['url']; ?>" class="post-img"><img src="<?php echo $url[$i]['urlToImage']; ?>" alt=""></a>
+                            <div class="post-info">
+                                <div class="author-info">
+                                    <h3><?php echo $url[$i]['author']; ?></h3>
+                                </div>
+                                <div class="post-date text-right">
+                                    <a href="<?php echo $url[$i]['url']; ?>"><?php echo $url[$i]['publishedAt']; ?></a>
+                                </div>
+                            </div>
+                            <div class="readmore">
+                                <p><?php echo $url[$i]['description']; ?><a href="<?php echo $url[$i]['url']; ?>">[Read more]</a></p>
+                            </div>    
+                        </article>
+
+                    <?php
+                    }
+                ?>
+                </div>
+                <?php                   
+            }elseif($atts['menu'] == 'weather'){
+                ?>
+                    <a class="weatherwidget-io" href="https://forecast7.com/en/22d8589d54/khulna/" data-label_1="KHULNA" data-label_2="WEATHER" data-font="Times New Roman" data-theme="weather_one" >KHULNA WEATHER</a>
+
+                    
+                    <?php
+            }elseif($atts['menu'] == 'local-events'){
+
+                ?>
+                <!-- <script>
+
+                    var unirest = require("unirest");
+
+                    var req = unirest("GET", "https://jgentes-crime-data-v1.p.rapidapi.com/crime");
+
+                    req.query({
+                        "startdate": "9%2F19%2F2015",
+                        "enddate": "9%2F25%2F2015",
+                        "lat": "37.757815",
+                        "long": "-122.5076392"
+                    });
+
+                    req.headers({
+                        "x-rapidapi-host": "jgentes-Crime-Data-v1.p.rapidapi.com",
+                        "x-rapidapi-key": "055398b754mshd4bb292b8e54f03p12ef29jsnf6bebd89fa75"
+                    });
+
+
+                    req.end(function (res) {
+                        if (res.error) throw new Error(res.error);
+
+                        console.log(res.body);
+                    });
+
+                </script> -->
+                <?php
+
+                    // $curl = curl_init();
+
+                    // curl_setopt_array($curl, array(
+                    //     CURLOPT_URL => "https://jgentes-crime-data-v1.p.rapidapi.com/crime?startdate=9%252F19%252F2015&enddate=9%252F25%252F2015&lat=37.757815&long=-122.5076392",
+                    //     CURLOPT_RETURNTRANSFER => true,
+                    //     CURLOPT_FOLLOWLOCATION => true,
+                    //     CURLOPT_ENCODING => "",
+                    //     CURLOPT_MAXREDIRS => 10,
+                    //     CURLOPT_TIMEOUT => 30,
+                    //     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                    //     CURLOPT_CUSTOMREQUEST => "GET",
+                    //     CURLOPT_HTTPHEADER => array(
+                    //         "x-rapidapi-host: jgentes-Crime-Data-v1.p.rapidapi.com",
+                    //         "x-rapidapi-key: 055398b754mshd4bb292b8e54f03p12ef29jsnf6bebd89fa75"
+                    //     ),
+                    // ));
+
+                    // $response = curl_exec($curl);
+                    // $err = curl_error($curl);
+
+                    // curl_close($curl);
+
+                    // if ($err) {
+                    //     echo "cURL Error #:" . $err;
+                    // } else {
+                    //     echo $response;
+                    // }
+
+            }elseif($atts['menu'] == 'crime-alert'){
+                
+
+            }
+
+
+
+
+            
+        }
+
 
         // Customize oEmbed markup
         function shapeSpace_oembed_html($html, $url, $attr, $post_id) {
@@ -225,114 +381,158 @@ if (!class_exists('youtube_custom_settingsClass')) {
                 update_option( 'add_all_url', $add_all_url);
             }
 
-        
+            if (isset($_POST['google_news_api'])){
+                
+                $google_news_api = $_POST['google_news_api'];
+                update_option( 'google_news_api', $google_news_api);
+            }
+
             ob_start();
             ?>
                 <div class="youtube_custom_settings-submenu">
+
                     <div class="youtube_custom_settings-submenu-title">
                         <h1><?php _e('Youtube Custom Settings', 'youtube_custom_settings'); ?></h1>
                     </div>
-                    <div class="youtube_custom_settings-submenu-body">
-                        
-                            <table class="deleteWrapTable">
-                                <tbody>
-                                    <tr> 
-                                        <th><?php _e('Show your custom button', 'youtube_custom_settings'); ?></th>
-                                        <td><div class='checkbox' id='hideSearch'>
-                                                <label class='checkbox__container'>
-                                                <input class='checkbox__toggle' type='checkbox' value="1" name='custom_button' <?php echo $checked = (get_option( 'custom_button' ) == 1) ? 'checked' : '' ; ?>/>
-                                                <span class='checkbox__checker'></span>
-                                                <span class='checkbox__txt-left'>On</span>
-                                                <span class='checkbox__txt-right'>Off</span>
-                                                <svg class='checkbox__bg' space='preserve' style='enable-background:new 0 0 110 43.76;' version='1.1' viewbox='0 0 110 43.76'>
-                                                    <path class='shape' d='M88.256,43.76c12.188,0,21.88-9.796,21.88-21.88S100.247,0,88.256,0c-15.745,0-20.67,12.281-33.257,12.281,S38.16,0,21.731,0C9.622,0-0.149,9.796-0.149,21.88s9.672,21.88,21.88,21.88c17.519,0,20.67-13.384,33.263-13.384,S72.784,43.76,88.256,43.76z'></path>
-                                                </svg>
-                                                </label>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr> 
-                                        <th><?php _e('Upload your button icon', 'youtube_custom_settings'); ?></th>
-                                        <td>
-                                            <form method="post">
-                                                <?php if(get_option('button_image') == 'null')
-                                                {
-                                                    echo '<input id="image-url" type="text" name="button_image" />';
-                                                }else{
-                                                    echo '<img src="'.get_option('button_image').'" height="42" width="42">';
-                                                    echo '<input type="hidden" id="image-url" type="text" name="button_image" />';
-                                                }?>
 
-                                                <input id="upload-button" type="button" class="button" value="Upload Image" />
-                                                <input type="submit" class="image_up_b" value="Submit" />
-                                            </form>
-                                        </td>
-                                    </tr>
-                                    <tr> 
-                                        <th><?php _e('Enable video full screen', 'youtube_custom_settings'); ?></th>
-                                        <td><div class='checkbox' id='hideSearch'>
-                                                <label class='checkbox__container'>
-                                                <input class='checkbox__toggle' type='checkbox' value="1" name='enable_full_screen' <?php echo $checked = (get_option( 'enable_full_screen' ) == 1) ? 'checked' : '' ; ?>/>
-                                                <span class='checkbox__checker'></span>
-                                                <span class='checkbox__txt-left'>On</span>
-                                                <span class='checkbox__txt-right'>Off</span>
-                                                <svg class='checkbox__bg' space='preserve' style='enable-background:new 0 0 110 43.76;' version='1.1' viewbox='0 0 110 43.76'>
-                                                    <path class='shape' d='M88.256,43.76c12.188,0,21.88-9.796,21.88-21.88S100.247,0,88.256,0c-15.745,0-20.67,12.281-33.257,12.281,S38.16,0,21.731,0C9.622,0-0.149,9.796-0.149,21.88s9.672,21.88,21.88,21.88c17.519,0,20.67-13.384,33.263-13.384,S72.784,43.76,88.256,43.76z'></path>
-                                                </svg>
-                                                </label>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr class="block_url_tr"> 
-                                        <th><?php _e('Enter the block URL', 'youtube_custom_settings'); ?></th>
-                                        <td>
-                                            <form method="post">
-                                                <div class="block_url">
-                                                    <input type="text" required="required" id="add_url" name="add_url" class="add_url_class">
-                                                    <button type="submit" name="add" id="add" class="button btn btn-success">+</button>
-                                                </div>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                    <tr> 
-                                        <th><?php _e('Remove block list URL', 'youtube_custom_settings'); ?></th>
-                                        <td>
-                                            <form method="post">
-                                                <div class="block_url">
-                                                    <input type="text" required="required" id="add_url" name="remove_url" class="add_url_class">
-                                                    <button type="submit" name="add" id="add" class="button btn btn-success">x</button>
-                                                </div>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                    <tr class="block_url_tr"> 
-                                        <th><?php
-                                        $all_url = json_decode(get_option('add_all_url'), true);
-                                        if (!empty($all_url)){
-                                         _e('Your block URL list', 'youtube_custom_settings'); 
-                                        }
-                                         ?></th>
-                                        <td>
-                                            <?php
-                                            
-                                            $all_url = json_decode(get_option('add_all_url'), true);
-                                            $all_url = array_values($all_url);
-
-                                            if (isset($all_url)){
-                                                echo '<ul class="block_list">';
-                                                for( $i = 0; $i < count($all_url); $i++ )
-                                                {
-                                                    echo '<li>' .$all_url[$i]. '</li>';
-                                                }
-                                                echo '</ul>';
-                                            }
-
-                                            ?>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    <div class="tab">
+                        <button class="tablinks active" onclick="openTab(event, 'videos_setting')"><?php _e('Videos setting', 'youtube_custom_settings'); ?></button>
+                        <button class="tablinks" onclick="openTab(event, 'block_url')"><?php _e('Block URL', 'youtube_custom_settings') ?></button>
+                        <button class="tablinks" onclick="openTab(event, 'settingsTab')"><?php _e('Api Settings', 'youtube_custom_settings') ?></button>
                     </div>
+
+                    <div id="videos_setting" style="display:block;" class="tabcontent youtube_custom_settings-submenu-body">
+                        <table class="deleteWrapTable">
+                            <tbody>
+                                <tr> 
+                                    <th><?php _e('Enable video full screen', 'youtube_custom_settings'); ?></th>
+                                    <td><div class='checkbox' id='hideSearch'>
+                                            <label class='checkbox__container'>
+                                            <input class='checkbox__toggle' type='checkbox' value="1" name='enable_full_screen' <?php echo $checked = (get_option( 'enable_full_screen' ) == 1) ? 'checked' : '' ; ?>/>
+                                            <span class='checkbox__checker'></span>
+                                            <span class='checkbox__txt-left'>On</span>
+                                            <span class='checkbox__txt-right'>Off</span>
+                                            <svg class='checkbox__bg' space='preserve' style='enable-background:new 0 0 110 43.76;' version='1.1' viewbox='0 0 110 43.76'>
+                                                <path class='shape' d='M88.256,43.76c12.188,0,21.88-9.796,21.88-21.88S100.247,0,88.256,0c-15.745,0-20.67,12.281-33.257,12.281,S38.16,0,21.731,0C9.622,0-0.149,9.796-0.149,21.88s9.672,21.88,21.88,21.88c17.519,0,20.67-13.384,33.263-13.384,S72.784,43.76,88.256,43.76z'></path>
+                                            </svg>
+                                            </label>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr> 
+                                    <th><?php _e('Show your custom button', 'youtube_custom_settings'); ?></th>
+                                    <td><div class='checkbox' id='hideSearch'>
+                                            <label class='checkbox__container'>
+                                            <input class='checkbox__toggle' type='checkbox' value="1" name='custom_button' <?php echo $checked = (get_option( 'custom_button' ) == 1) ? 'checked' : '' ; ?>/>
+                                            <span class='checkbox__checker'></span>
+                                            <span class='checkbox__txt-left'>On</span>
+                                            <span class='checkbox__txt-right'>Off</span>
+                                            <svg class='checkbox__bg' space='preserve' style='enable-background:new 0 0 110 43.76;' version='1.1' viewbox='0 0 110 43.76'>
+                                                <path class='shape' d='M88.256,43.76c12.188,0,21.88-9.796,21.88-21.88S100.247,0,88.256,0c-15.745,0-20.67,12.281-33.257,12.281,S38.16,0,21.731,0C9.622,0-0.149,9.796-0.149,21.88s9.672,21.88,21.88,21.88c17.519,0,20.67-13.384,33.263-13.384,S72.784,43.76,88.256,43.76z'></path>
+                                            </svg>
+                                            </label>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr> 
+                                    <th><?php _e('Upload your button icon', 'youtube_custom_settings'); ?></th>
+                                    <td>
+                                        <form method="post">
+                                            <?php if(get_option('button_image') == '')
+                                            {
+                                                echo '<input id="image-url" type="text" name="button_image" />';
+                                            }else{
+                                                echo '<img src="'.get_option('button_image').'" height="42" width="42">';
+                                                echo '<input type="hidden" id="image-url" type="text" name="button_image" />';
+                                            }?>
+
+                                            <input id="upload-button" type="button" class="button" value="Upload Image" />
+                                            <input type="submit" class="image_up_b" value="Submit" />
+                                        </form>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="block_url" class="tabcontent youtube_custom_settings-submenu-body">
+                        <div class="delete_denger">
+                            <strong><?php _e('Note: ', 'youtube_custom_settings'); ?></strong><span><?php _e('Danger zone.', 'youtube_custom_settings'); ?></span>
+                        </div>
+                        <table class="deleteWrapTable">
+                            <tbody>
+                                <tr class="block_url_tr"> 
+                                    <th><?php _e('Enter the block URL', 'youtube_custom_settings'); ?></th>
+                                    <td>
+                                        <form method="post">
+                                            <div class="block_url">
+                                                <input type="text" required="required" id="add_url" name="add_url" class="add_url_class">
+                                                <button type="submit" name="add" id="add" class="button btn btn-success">+</button>
+                                            </div>
+                                        </form>
+                                    </td>
+                                </tr>
+                                <tr> 
+                                    <th><?php _e('Remove block list URL', 'youtube_custom_settings'); ?></th>
+                                    <td>
+                                        <form method="post">
+                                            <div class="block_url">
+                                                <input type="text" required="required" id="add_url" name="remove_url" class="add_url_class">
+                                                <button type="submit" name="add" id="add" class="button btn btn-success">x</button>
+                                            </div>
+                                        </form>
+                                    </td>
+                                </tr>
+                                <tr class="block_url_tr"> 
+                                    <th><?php
+                                    $all_url = json_decode(get_option('add_all_url'), true);
+                                    if (!empty($all_url)){
+                                        _e('Your block URL list', 'youtube_custom_settings'); 
+                                    }
+                                        ?></th>
+                                    <td>
+                                        <?php
+                                        
+                                        $all_url = json_decode(get_option('add_all_url'), true);
+                                        $all_url = array_values($all_url);
+
+                                        if (isset($all_url)){
+                                            echo '<ul class="block_list">';
+                                            for( $i = 0; $i < count($all_url); $i++ )
+                                            {
+                                                echo '<li>' .$all_url[$i]. '</li>';
+                                            }
+                                            echo '</ul>';
+                                        }
+
+                                        ?>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="settingsTab" class="tabcontent youtube_custom_settings-submenu-body">
+                        <table class="deleteWrapTable">
+                            <tbody>
+                                <tr class="block_url_tr"> 
+                                    <th><?php _e('Enter your google news api', 'youtube_custom_settings'); ?></th>
+                                    <td>
+                                        <form method="post">
+                                            <div class="google_news_api">
+                                                <input type="text" required="required" value="<?php echo $google_news_api = (get_option( 'google_news_api' ) == '') ? '9a47449ffc2b4fcc8f1877ecfa13908c': get_option( 'google_news_api' ); ?>" id="google_news_api" name="google_news_api" class="add_url_class">
+                                                <button type="submit" name="add" id="add" class="button btn btn-success">+</button>
+                                            </div>
+                                        </form>
+                                    </td>
+                                </tr>
+                                <tr class="block_url_tr"> 
+                                    <th><?php _e('Google breaking news shortcode', 'youtube_custom_settings'); ?></th>
+                                    <td class="shortcode"><?php echo '[breaking-news]'; ?></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+                    
                 </div>
             <?php
             $output = ob_get_clean();
