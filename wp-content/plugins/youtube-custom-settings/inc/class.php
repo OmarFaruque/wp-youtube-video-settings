@@ -715,6 +715,7 @@ if (!class_exists('youtube_custom_settingsClass')) {
             wp_enqueue_style( 'weatheratlasfotncss', $this->plugin_url . 'asset/font/weather-icons/weather-icons.min.css', array(), true, 'all' );
 
             // js
+            
             wp_enqueue_script('fyoutube_custom_settingsJS', $this->plugin_url . 'asset/js/youtube_custom_settings_frontend.js', array('jquery'), time(), true);
             
             wp_localize_script( 'fyoutube_custom_settingsJS', 'youtubeAjax', 
@@ -818,13 +819,19 @@ if (!class_exists('youtube_custom_settingsClass')) {
                 $country = json_decode($country, true);
                 $city = $country['city'];
                 
-
-                $city_code = file_get_contents("https://www.weather-atlas.com/weather/includes/autocomplete_city.php?limit=15&language=en&term=".$city);
-            //    $city_code =  preg_replace('/^.*(\(.*\)).*$/', '$1', $city_code);
-                // $city_code = trim($city_code, '[]');
-                // $city_code = utf8_encode($city_code);
+                
+                $city_code = file_get_contents("https://www.weather-atlas.com/weather/includes/autocomplete_city.php?limit=1&language=en&term=".rawurlencode($city));
+                
                 $city_code = explode(',', $city_code);
-                $city_code = ltrim(str_replace('}', '', $city_code[1]));
+                $arrayIndex = 0;
+                foreach($city_code as $k => $sc){
+                    if (strpos($sc, 'city_selector') !== false) {
+                        $arrayIndex = $k;        
+                    }
+                }
+                
+                $city_code = ltrim(str_replace('}', '', $city_code[$arrayIndex]));
+                
                 $city_code = explode(':', $city_code);
                 $city_code = str_replace('"', '', $city_code[1]);
                 // $city_code = json_decode($city_code[1], true);
