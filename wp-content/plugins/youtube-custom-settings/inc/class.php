@@ -33,6 +33,10 @@ if (!class_exists('youtube_custom_settingsClass')) {
             //Customize oEmbed markup
             add_filter('embed_oembed_html', array($this, 'shapeSpace_oembed_html'), 99, 4);
 
+            add_action('peepso_activity_post_attachment', array(&$this, 'rcb_content_attach_media'), 20);
+            add_action('peepso_activity_comment_attachment', array(&$this, 'rcb_content_attach_media'), 10);
+
+
             //custom button function function 
             add_action('wp_ajax_nopriv_custom_buttonfunction', array($this, 'custom_buttonfunction'));
             add_action( 'wp_ajax_custom_buttonfunction', array($this, 'custom_buttonfunction') );
@@ -965,6 +969,78 @@ if (!class_exists('youtube_custom_settingsClass')) {
                 return $html;
             }
                 
+        }
+
+
+        /**
+         * Displays the embeded media on the post or comment.
+         * - peepso_activity_post_attachment
+         * - peepso_activity_comment_attachment
+         * @param WP_Post The current post object
+         */
+        public function rcb_content_attach_media($post)
+        {
+            echo 'rcb_content_attach_media';
+
+            $allow_embed = PeepSo::get_option('allow_embed', 1) === 1;
+            if (!$allow_embed)
+                return;
+
+            $show_preview = get_post_meta($post->ID, '_peepso_display_link_preview', TRUE);
+
+            if ('0' === $show_preview)
+                return;
+
+            $peepso_media = get_post_meta($post->ID, 'peepso_media');
+
+            if (empty($peepso_media))
+                return;
+
+            $peepso_media = apply_filters('peepso_content_media', $peepso_media, $post);
+            $new_tabs = PeepSo::get_option('site_activity_open_links_in_new_tab', 1);
+            foreach ($peepso_media as $media) {
+                if (isset($media['embed']) && $media['embed']) {
+                    PeepSoTemplate::exec_template('activity', 'content-embed', $media['embed']);
+                    continue;
+                }
+
+                if (!isset($media['url']) || !isset($media['description']))
+                    continue;
+
+                $url = parse_url($media['url']);
+                if('https' != $url['scheme'] && !PeepSo::get_option('allow_non_ssl_embed', 0)) {
+                    update_post_meta($post->ID, '_peepso_display_link_preview', 0);
+                    continue;
+                }
+
+                $media['target'] = '';
+                if ($new_tabs)
+                    $media['target'] = 'target="_blank"';
+
+                $media['host'] = parse_url($media['url'], PHP_URL_HOST);
+
+                // make iframe full-width
+                $media['content'] = isset($media['content']) ? $media['content'] : '';
+                if (preg_match('/<iframe/i', $media['content'])) {
+                    $width_pattern = "/width=\"[0-9]*\"/";
+                    $media['content'] = preg_replace($width_pattern, "width='100%'", $media['content']);
+                    $media['content'] = '<div class="ps-media-iframe">' . $media['content'] . '</div>';
+                }
+
+                // Improve Facebook embedded content rendering.
+                if (preg_match('#class="fb-(post|video)"#i', $media['content'])) {
+
+                    // Remove Facebook SDK loader code.
+                    $media['content'] = preg_replace('#<div[^>]+id="fb-root"[^<]+</div>#i', '', $media['content']);
+                    $media['content'] = preg_replace('#<script[^<]+</script>#i', '', $media['content']);
+
+                    // Remove width setting, follow container width.
+                    // #1931 Fix Facebook video issue.
+                    $media['content'] = preg_replace('#\sdata-width=["\']\d+%?["\']#i', '', $media['content']);
+                }
+
+                PeepSoTemplate::exec_template('activity', 'content-media', $media);
+            }
         }
 
 
