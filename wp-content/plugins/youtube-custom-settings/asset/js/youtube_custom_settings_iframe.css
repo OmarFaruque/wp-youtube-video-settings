@@ -1,0 +1,9 @@
+.ytp-chrome-top.ytp-show-cards-title {
+    display: none;
+}
+.ytp-pause-overlay.ytp-scroll-min.ytp-scroll-max {
+    display: none;
+}
+a.ytp-watermark.yt-uix-sessionlink {
+    display: none;
+}

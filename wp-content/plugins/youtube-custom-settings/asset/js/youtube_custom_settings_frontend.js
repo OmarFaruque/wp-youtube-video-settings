@@ -1,6 +1,7 @@
 
 jQuery(document).ready(function($){
   
+
   
   //jQuery('iframe').attr('id','iframe1');
 
@@ -22,14 +23,20 @@ jQuery(document).ready(function($){
   var players = new Array(playerDivsArr.length); // gets the yt-player objects
   var waypoints = new Array(playerDivsArr.length);
 
- // console.log(waypoints);
+ 
 
+
+//  console.log(playerDivsArr);
   // when youtube stuff is ready
   onYouTubeIframeAPIReady = function () {
     
     // create yt players
+    
     playerDivsArr.forEach(function(e, i) { // forEach ...
       
+      // console.log(e);
+      console.log('test i: ' + i);
+      console.log('test i: ' + e.id);
       players[i] = new YT.Player(e.id, {
 
         events: {
@@ -42,6 +49,18 @@ jQuery(document).ready(function($){
     });
     
   }
+
+  console.log(players);
+
+
+
+
+
+  // jQuery(document).on('click', '.start-video', function (e) {
+  //   jQuery(this).fadeOut('normal');
+  //   jQuery(this).attr("style", "display: none;");
+  //   players['iframe'].playVideo();
+  // });
 
   onPlayerStateChange = function (event) {
     // console.log(event.target.f);
@@ -72,10 +91,13 @@ jQuery(document).ready(function($){
 
   }
   function onPlayerReady(event) {
-    
+    console.log(event);
+    console.log('tst console');
+    console.log(players);
     players.forEach(function(yt, i) {
-
+      console.log('outside');
       jQuery(document).on('click', '.start-video', function (e) {
+        console.log('start play');
         //console.log(players[i].f.id);
         var thisfid = jQuery(this).prev('iframe').attr('id');
        // console.log('this event id: ' + thisfid);
@@ -114,7 +136,7 @@ jQuery(document).ready(function($){
     var all_url_arr = all_url[i].split(".");
     var all_url_var = all_url_arr[1];
 
-    //console.log(all_url_var);
+    // console.log(all_url_var);
 
     jQuery('a').each(function(v, k){
 
@@ -122,7 +144,7 @@ jQuery(document).ready(function($){
       var href_arr = href.split(".");
       var href_var = href_arr[1];
 
-      //console.log(all_url_var);
+      // console.log(all_url_var);
 
       if(all_url_var.includes(href_var)){
           this.remove();
@@ -135,3 +157,16 @@ jQuery(document).ready(function($){
 });
 
 !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');
+
+
+
+/* Youtube Autoplay function */
+// jQuery(document).ready(function($){
+//   var youtubeautoplay = function(){
+//     jQuery('div.oembed').each(function(){
+//         $(this).find('.start-video').trigger('click');
+//     });
+//   }
+//   youtubeautoplay();
+// });
+// temporary desabled

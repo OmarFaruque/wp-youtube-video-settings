@@ -3,6 +3,8 @@
 * youtube_custom_settings Class 
 */
 
+
+
 if (!class_exists('youtube_custom_settingsClass')) {
     class youtube_custom_settingsClass{
         public $plugin_url;
@@ -27,11 +29,20 @@ if (!class_exists('youtube_custom_settingsClass')) {
             add_action( 'admin_enqueue_scripts', array($this, 'youtube_custom_settings_backend_script') );
             //Frontend Script
             add_action( 'wp_enqueue_scripts', array($this, 'youtube_custom_settings_frontend_script') );
+            
+            add_action('wp_enqueue_scripts', array(&$this, 'enqueue_scripts'));
             //Add Menu Options
             add_action('admin_menu', array($this, 'youtube_custom_settings_admin_menu_function'));
 
             //Customize oEmbed markup
             add_filter('embed_oembed_html', array($this, 'shapeSpace_oembed_html'), 99, 4);
+
+            // add_action('peepso_activity_post_attachment', array(&$this, 'rcb_content_attach_media'), 30);
+            // add_action('peepso_activity_comment_attachment', array(&$this, 'rcb_content_attach_media'), 40);
+
+            // add_action( 'wp_print_scripts', array($this, 'remove_my_action'), 100);
+            // add_action( 'init', array($this, 'remove_my_action'), 100);
+
 
             //custom button function function 
             add_action('wp_ajax_nopriv_custom_buttonfunction', array($this, 'custom_buttonfunction'));
@@ -52,8 +63,55 @@ if (!class_exists('youtube_custom_settingsClass')) {
 
             // Weather shortcode 
             add_shortcode( 'shortcode-weather-atlas', array($this, 'function_shortcode_weather_atlas_widget') );
+       
+       
+       
+            
+            add_filter( 'peepso_get_template_name', array($this, 'changePepsoFilePath') );
+       
+       
+       
         }
 
+
+        /*
+        * Change Pepso file jpath located at template.php
+        */
+        public function changePepsoFilePath($file_path){
+            // echo 'filepath from our class: ' . $file_path . '<br/>';
+            // echo 'basename: ' . basename($file_path) . '<br/>';
+            if(file_exists($file_path) && basename($file_path) == 'content-embed.php'){
+                $file_path = $this->plugin_dir . 'temp/content-embed.php';
+            }
+
+
+            return $file_path;
+        }
+
+
+    /*
+	 * enqueues the scripts needed by the Activity Stream
+	 */
+	public function enqueue_scripts()
+	{
+		wp_register_script('peepso-activitystream', $this->plugin_url . 'asset/js/activitystream.js',
+			array('peepso'), PeepSo::PLUGIN_VERSION, TRUE);
+	}
+
+        
+        public function remove_my_action(){
+            // wp_deregister_script('peepso-activitystream');
+            // wp_dequeue_script('peepso-activitystream');
+            
+            // wp_register_script('peepsoactivitystream', $this->plugin_url . 'asset/js/activitystream.js', array('peepso'), PeepSo::PLUGIN_VERSION, TRUE );
+      
+      
+      
+            // wp_register_script('peepso-activity', PeepSo::get_asset('js/activity.js'),
+            // array('peepso', 'peepsoactivitystream', 'peepso-window', 'peepso-comment', 'peepso-form'), PeepSo::PLUGIN_VERSION, TRUE);
+            
+        }
+        
 
         public function function_shortcode_weather_atlas_widget( $attributes )
         {
@@ -715,7 +773,10 @@ if (!class_exists('youtube_custom_settingsClass')) {
             wp_enqueue_style( 'weatheratlasfotncss', $this->plugin_url . 'asset/font/weather-icons/weather-icons.min.css', array(), true, 'all' );
 
             // js
+            
+            wp_enqueue_script( 'peepsoactivitystream' );
             wp_enqueue_script('fyoutube_custom_settingsJS', $this->plugin_url . 'asset/js/youtube_custom_settings_frontend.js', array('jquery'), time(), true);
+
             
             wp_localize_script( 'fyoutube_custom_settingsJS', 'youtubeAjax', 
                 array(
@@ -818,13 +879,19 @@ if (!class_exists('youtube_custom_settingsClass')) {
                 $country = json_decode($country, true);
                 $city = $country['city'];
                 
-
-                $city_code = file_get_contents("https://www.weather-atlas.com/weather/includes/autocomplete_city.php?limit=15&language=en&term=".$city);
-            //    $city_code =  preg_replace('/^.*(\(.*\)).*$/', '$1', $city_code);
-                // $city_code = trim($city_code, '[]');
-                // $city_code = utf8_encode($city_code);
+                
+                $city_code = file_get_contents("https://www.weather-atlas.com/weather/includes/autocomplete_city.php?limit=1&language=en&term=".rawurlencode($city));
+                
                 $city_code = explode(',', $city_code);
-                $city_code = ltrim(str_replace('}', '', $city_code[1]));
+                $arrayIndex = 0;
+                foreach($city_code as $k => $sc){
+                    if (strpos($sc, 'city_selector') !== false) {
+                        $arrayIndex = $k;        
+                    }
+                }
+                
+                $city_code = ltrim(str_replace('}', '', $city_code[$arrayIndex]));
+                
                 $city_code = explode(':', $city_code);
                 $city_code = str_replace('"', '', $city_code[1]);
                 // $city_code = json_decode($city_code[1], true);
@@ -914,9 +981,9 @@ if (!class_exists('youtube_custom_settingsClass')) {
 
             $end_id = end($id);
             
-            $html = '<iframe src="//www.youtube.com/embed/'.$end_id.'?enablejsapi=1&amp;rel=0&amp;showinfo=0&amp;" frameborder="0" '.$enable_full_screen.'></iframe><div class="start-video"></div>';
+            $html = '<iframe style="min-height:300px;" src="//www.youtube.com/embed/'.$end_id.'?enablejsapi=1&amp;rel=0&amp;showinfo=0&amp;" frameborder="0" '.$enable_full_screen.'></iframe><div class="start-video"></div>';
             
-            return '<div class="oembed">        
+            return '<div class="oembed" style="min-height:300px">        
                         <div class="video_overly_ch1 video_play_op"></div>
                         <div class="video_overly_ch2 video_play_op"></div>
                         <div class="video_overly_ch3 video_play_op"></div>
@@ -958,6 +1025,201 @@ if (!class_exists('youtube_custom_settingsClass')) {
                 return $html;
             }
                 
+        }
+
+
+        /**
+         * Displays the embeded media on the post or comment.
+         * - peepso_activity_post_attachment
+         * - peepso_activity_comment_attachment
+         * @param WP_Post The current post object
+        **/
+
+        // public function rcb_content_attach_media($post)
+        // {   
+        //     $enable_full_screen = (get_option( 'enable_full_screen' ) == 1) ? 'allowfullscreen' : '';
+        //     // echo 'post_peepso : </br><pre>';
+        //     // print_r($post);
+        //     // echo '</pre>';
+
+        //     $post_content = $post->post_content;
+        //     $id = explode("/", $post_content);
+        //     //$videos_all_url = $id[2];
+
+        //     // echo 'id : </br><pre>';
+        //     // print_r($id);
+        //     // echo '</pre>';
+
+        //     $key = array_search('youtu.be', $id);
+        //     $id = explode(" ", $id[$key+1]);
+        //     $id = $id[0];
+        //     // echo '</br>id : ' . $id . '</br>';
+
+
+
+
+        //     // $allow_embed = PeepSo::get_option('allow_embed', 1) === 1;
+        //     // if (!$allow_embed)
+        //     //     return;
+    
+        //     // $show_preview = get_post_meta($post->ID, '_peepso_display_link_preview', TRUE);
+    
+        //     // if ('0' === $show_preview)
+        //     //     return;
+    
+        //     $peepso_media = get_post_meta($post->ID, 'peepso_media');
+    
+        //     // if (empty($peepso_media))
+        //     //     return;
+    
+        //     $peepso_media = apply_filters('peepso_content_media', $peepso_media, $post);
+
+
+        //     // $new_tabs = PeepSo::get_option('site_activity_open_links_in_new_tab', 1);
+
+        //     // echo 'peepso_media : </br><pre>';
+        //     // print_r($peepso_media);
+        //     // echo '</pre>';
+
+        //     foreach ($peepso_media as $media) {
+
+
+        //         $html = '<iframe width="100%" data-original-width="580" height="326" src="//www.youtube.com/embed/'.$id.'?enablejsapi=1&amp;rel=0&amp;showinfo=0&amp;" frameborder="0" '.$enable_full_screen.' data-origwidth="100%" data-origheight="326" style="width: 550px; ></iframe><div class="start-video"></div>';
+
+        //         $$media['embed']['html'] = '<div class="oembed">        
+        //                                         <div class="video_overly_ch1 video_play_op"></div>
+        //                                         <div class="video_overly_ch2 video_play_op"></div>
+        //                                         <div class="video_overly_ch3 video_play_op"></div>
+        //                                         <div class="video_overly_ch4 video_play_op"></div>
+        //                                         <div class="video_overly_ch_m1 video_play_op"></div>
+        //                                         <div class="video_overly_ch5 video_play_op"></div>
+        //                                         <div class="video_overly_ch6 video_play_op"></div>
+        //                                         <div class="video_overly_ch7 video_play_op"></div>
+        //                                         <div class="video_overly_ch_m2"></div>
+        //                                         <div class="video_overly_sch1"></div>
+                                                
+        //                                         '. $html .'
+        //                                     </div>';
+
+        //         echo $$media['embed']['html'];
+
+        //         // if (isset($media['embed']) && $media['embed']) {
+        //         //     PeepSoTemplate::exec_template('activity', 'content-embed', $media['embed']);
+        //         //     continue;
+        //         // }
+    
+        //         // if (!isset($media['url']) || !isset($media['description']))
+        //         //     continue;
+    
+        //         // $url = parse_url($media['url']);
+        //         // if('https' != $url['scheme'] && !PeepSo::get_option('allow_non_ssl_embed', 0)) {
+        //         //     update_post_meta($post->ID, '_peepso_display_link_preview', 0);
+        //         //     continue;
+        //         // }
+    
+        //         // $media['target'] = '';
+        //         // if ($new_tabs)
+        //         //     $media['target'] = 'target="_blank"';
+    
+        //         // $media['host'] = parse_url($media['url'], PHP_URL_HOST);
+    
+        //         // // make iframe full-width
+        //         // $media['content'] = isset($media['content']) ? $media['content'] : '';
+        //         // if (preg_match('/<iframe/i', $media['content'])) {
+        //         //     $width_pattern = "/width=\"[0-9]*\"/";
+        //         //     $media['content'] = preg_replace($width_pattern, "width='100%'", $media['content']);
+        //         //     $media['content'] = '<div class="ps-media-iframe jony">' . $media['content'] . '</div>';
+        //         // }
+    
+        //         // // Improve Facebook embedded content rendering.
+        //         // if (preg_match('#class="fb-(post|video)"#i', $media['content'])) {
+    
+        //         //     // Remove Facebook SDK loader code.
+        //         //     $media['content'] = preg_replace('#<div[^>]+id="fb-root"[^<]+</div>#i', '', $media['content']);
+        //         //     $media['content'] = preg_replace('#<script[^<]+</script>#i', '', $media['content']);
+    
+        //         //     // Remove width setting, follow container width.
+        //         //     // #1931 Fix Facebook video issue.
+        //         //     $media['content'] = preg_replace('#\sdata-width=["\']\d+%?["\']#i', '', $media['content']);
+        //         // }
+    
+        //         //PeepSoTemplate::exec_template('activity', 'content-media', $media);
+        //     }
+        // }
+
+
+        // require_once(dirname(__FILE__).'/../classes/profilefields.php');
+
+        public function rcb_content_attach_media($post)
+        {
+
+            echo 'for_jony 1 </br>';
+            $allow_embed = PeepSo::get_option('allow_embed', 1) === 1;
+            if (!$allow_embed)
+                return;
+                echo 'for_jony 2 </br>';
+            $show_preview = get_post_meta($post->ID, '_peepso_display_link_preview', TRUE);
+            
+            if ('0' === $show_preview)
+                return;
+                echo 'for_jony 3 </br>';
+            $peepso_media = get_post_meta($post->ID, 'peepso_media');
+    
+            if (empty($peepso_media))
+                return;
+                echo 'for_jony 4 </br>';
+            $peepso_media = apply_filters('peepso_content_media', $peepso_media, $post);
+            $new_tabs = PeepSo::get_option('site_activity_open_links_in_new_tab', 1);
+
+
+            echo 'for_jony 5 </br> <pre>'; 
+            print_r($peepso_media);
+            echo '</pre>';
+            
+            foreach ($peepso_media as $media) {
+
+                if (isset($media['embed']) && $media['embed']) {
+                    PeepSoTemplate::exec_template('activity', 'content-embed', $media['embed']);
+                    continue;
+                }
+    
+                if (!isset($media['url']) || !isset($media['description']))
+                    continue;
+    
+                $url = parse_url($media['url']);
+                if('https' != $url['scheme'] && !PeepSo::get_option('allow_non_ssl_embed', 0)) {
+                    update_post_meta($post->ID, '_peepso_display_link_preview', 0);
+                    continue;
+                }
+    
+                $media['target'] = '';
+                if ($new_tabs)
+                    $media['target'] = 'target="_blank"';
+    
+                $media['host'] = parse_url($media['url'], PHP_URL_HOST);
+    
+                // make iframe full-width
+                $media['content'] = isset($media['content']) ? $media['content'] : '';
+                if (preg_match('/<iframe/i', $media['content'])) {
+                    $width_pattern = "/width=\"[0-9]*\"/";
+                    $media['content'] = preg_replace($width_pattern, "width='100%'", $media['content']);
+                    $media['content'] = '<div class="ps-media-iframe">' . $media['content'] . '</div>';
+                }
+    
+                // Improve Facebook embedded content rendering.
+                if (preg_match('#class="fb-(post|video)"#i', $media['content'])) {
+    
+                    // Remove Facebook SDK loader code.
+                    $media['content'] = preg_replace('#<div[^>]+id="fb-root"[^<]+</div>#i', '', $media['content']);
+                    $media['content'] = preg_replace('#<script[^<]+</script>#i', '', $media['content']);
+    
+                    // Remove width setting, follow container width.
+                    // #1931 Fix Facebook video issue.
+                    $media['content'] = preg_replace('#\sdata-width=["\']\d+%?["\']#i', '', $media['content']);
+                }
+    
+                PeepSoTemplate::exec_template('activity', 'content-media', $media);
+            }
         }
 
 
@@ -1205,6 +1467,12 @@ if (!class_exists('youtube_custom_settingsClass')) {
         * youtubeJStoFrontHead JS to Admin head
         */
         function youtubeJStoFrontHead(){
+
+
+
+            // require_once(dirname(__FILE__).'/../../peepso-core/activity/classes/activity.php');
+            // $newAcctive = new PeepSoActivity;
+            // echo 'test function output: ' . $newAcctive->test() . '<br/>';
 
             $button_image = get_option( 'button_image' );
 
