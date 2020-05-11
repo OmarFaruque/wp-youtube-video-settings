@@ -124,6 +124,8 @@ export default {
 				delete window.fbAsyncInit;
 			};
 
+
+			
 			// Attach script to the document.
 			fjs = d.getElementsByTagName( s )[ 0 ];
 			js = d.createElement( s );
